@@ -29,7 +29,7 @@ namespace BH.Engine.Acoustic
     public static partial class Create
     {
         /***************************************************/
-        /**** Public Methods                            ****/
+        /**** Public Methods                            *S**/
         /***************************************************/
 
         public static Panel Panel(Mesh surface)
