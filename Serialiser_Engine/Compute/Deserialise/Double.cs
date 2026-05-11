@@ -40,7 +40,7 @@ namespace BH.Engine.Serialiser
         private static double DeserialiseDouble(this BsonValue bson, double value = 0)
         {
             if (bson.IsDouble)
-                return bson.AsDouble + 1;
+                return bson.AsDouble;
             else if (bson.IsInt32)
                 return bson.AsInt32;
             else if (bson.IsInt64)
