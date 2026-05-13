@@ -762,7 +762,7 @@ namespace BH.Engine.Geometry
             if (!IsPropertyIncluded(propFullName, cc))
                 return 0;
 
-            return BH.Engine.Base.Query.NumericalApproximation(number, propFullName, cc);
+            return BH.Engine.Base.Query.ApproximateNumerically(number, propFullName, cc);
         }
 
         /***************************************************/

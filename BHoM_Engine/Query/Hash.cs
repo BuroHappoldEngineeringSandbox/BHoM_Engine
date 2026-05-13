@@ -150,18 +150,18 @@ namespace BH.Engine.Base
                     return $"\n{tabs}" + obj.ToString();
 
                 if (type == typeof(double))
-                    return $"\n{tabs}" + NumericalApproximation((double)obj, currentPropertyFullName, cc).ToString();
+                    return $"\n{tabs}" + ApproximateNumerically((double)obj, currentPropertyFullName, cc).ToString();
 
                 if (type == typeof(int))
-                    return $"\n{tabs}" + NumericalApproximation((int)obj, currentPropertyFullName, cc).ToString();
+                    return $"\n{tabs}" + ApproximateNumerically((int)obj, currentPropertyFullName, cc).ToString();
 
                 // Fallback for any other floating-point numeric type.
                 if (type.IsNumericFloatingPointType())
-                    return $"\n{tabs}" + NumericalApproximation(double.Parse(obj.ToString()), currentPropertyFullName, cc).ToString();
+                    return $"\n{tabs}" + ApproximateNumerically(double.Parse(obj.ToString()), currentPropertyFullName, cc).ToString();
 
                 // Fallback for any other integral numeric type.
                 if (type.IsNumericIntegralType())
-                    return $"\n{tabs}" + NumericalApproximation(double.Parse(obj.ToString()), currentPropertyFullName, cc).ToString();
+                    return $"\n{tabs}" + ApproximateNumerically(double.Parse(obj.ToString()), currentPropertyFullName, cc).ToString();
 
             }
             else if (type.IsPrimitive || type == typeof(String))

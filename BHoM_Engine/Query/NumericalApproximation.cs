@@ -46,11 +46,11 @@ namespace BH.Engine.Base
         [Input("number", "Number to approximate.")]
         [Input("fullName", "Name of the number or of the property that holds this number. This name will be used to seek any matching custom tolerance/significant figure to apply for this approximation in the `comparisonConfig` input.")]
         [Input("comparisonConfig", "Object that stores the settings that will used for the approximation.")]
-        public static double NumericalApproximation(this double number, string fullName = null, BaseComparisonConfig comparisonConfig = null)
+        public static double ApproximateNumerically(this double number, string fullName = null, BaseComparisonConfig comparisonConfig = null)
         {
             comparisonConfig = comparisonConfig ?? new ComparisonConfig();
 
-            return NumericalApproximation(number, fullName, comparisonConfig.PropertyNumericTolerances, comparisonConfig.NumericTolerance, comparisonConfig.PropertySignificantFigures, comparisonConfig.SignificantFigures);
+            return ApproximateNumerically(number, fullName, comparisonConfig.PropertyNumericTolerances, comparisonConfig.NumericTolerance, comparisonConfig.PropertySignificantFigures, comparisonConfig.SignificantFigures);
         }
 
         /***************************************************/
@@ -59,11 +59,11 @@ namespace BH.Engine.Base
         [Input("number", "Number to approximate.")]
         [Input("fullName", "Name of the number or of the property that holds this number. This name will be used to seek any matching custom tolerance/significant figure to apply for this approximation in the `comparisonConfig` input.")]
         [Input("comparisonConfig", "Object that stores the settings that will used for the approximation.")]
-        public static double NumericalApproximation(this int number, string fullName = null, BaseComparisonConfig comparisonConfig = null)
+        public static double ApproximateNumerically(this int number, string fullName = null, BaseComparisonConfig comparisonConfig = null)
         {
             comparisonConfig = comparisonConfig ?? new ComparisonConfig();
 
-            return NumericalApproximation(number, fullName, comparisonConfig.PropertySignificantFigures, comparisonConfig.SignificantFigures);
+            return ApproximateNumerically(number, fullName, comparisonConfig.PropertySignificantFigures, comparisonConfig.SignificantFigures);
         }
 
         /***************************************************/
@@ -75,7 +75,7 @@ namespace BH.Engine.Base
         [Input("globalNumericTolerance", "Fallback numeric tolerance to be used if no matching customNumericTolerance is found.")]
         [Input("customSignificantFigures", "Named custom significant figures to be used for this approximation. If the `fullName` input matches any of these, it will be used. Wildcards are supported.")]
         [Input("globalSignificantFigures", "Fallback significant figures to be used if no matching customNumericTolerance is found.")]
-        public static double NumericalApproximation(this double number, string fullName = null,
+        public static double ApproximateNumerically(this double number, string fullName = null,
             HashSet<NamedNumericTolerance> customNumericTolerances = null, double globalNumericTolerance = double.MinValue,
             HashSet<NamedSignificantFigures> customSignificantFigures = null, int globalSignificantFigures = int.MaxValue)
         {
@@ -116,7 +116,7 @@ namespace BH.Engine.Base
         [Input("fullName", "Name of the number or of the property that holds this number. This name will be used to seek any matching custom tolerance/significant figure to apply for this approximation.")]
         [Input("customSignificantFigures", "Named custom significant figures to be used for this approximation. If the `fullName` input matches any of these, it will be used. Wildcards are supported.")]
         [Input("globalSignificantFigures", "Fallback significant figures to be used if no matching customNumericTolerance is found.")]
-        public static int NumericalApproximation(this int number, string fullName = null,
+        public static int ApproximateNumerically(this int number, string fullName = null,
             HashSet<NamedSignificantFigures> customSignificantFigures = null, int globalSignificantFigures = int.MaxValue)
         {
             // If we didn't specify any custom tolerance, just return the input.
