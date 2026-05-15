@@ -1,0 +1,13 @@
+name: Versioning (release)
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  versioning:
+    uses: BuroHappoldEngineeringSandbox/CI_Toolkit/.github/workflows/ci-versioning-release.yml@main
+    secrets: inherit
