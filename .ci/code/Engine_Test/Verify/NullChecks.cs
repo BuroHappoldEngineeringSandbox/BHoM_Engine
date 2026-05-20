@@ -48,7 +48,7 @@ namespace BH.Test.Engine
             BH.Engine.Base.Compute.LoadAllAssemblies();
 
             // Ignore because of stack overflow or need to install external libraries
-            List<string> toIgnore = new List<string> { "MachineLearning", "Python", "LifeCycleAssessment.Query.GetEvaluationValue", "Forms.Compute.FilePathSelectionDialog"  };
+            List<string> toIgnore = new List<string> { "MachineLearning", "Python", "LifeCycleAssessment.Query.GetEvaluationValue", "Forms.Compute.FilePathSelectionDialog" };
 
             // Test all the BHoM types available
             List<MethodInfo> methods = BH.Engine.Base.Query.BHoMMethodList()
