@@ -3,4 +3,5 @@
 
 * @BuroHappoldEngineeringSandbox/bim-developers
 *.yml @BuroHappoldEngineeringSandbox/bim-developers
-.github/ @BuroHappoldEngineeringSandbox/bim
+.github/CODEOWNERS @BuroHappoldEngineeringSandbox/bim
+.github/workflows/ @BuroHappoldEngineeringSandbox/bim
