@@ -36,8 +36,8 @@ namespace BH.Engine.Base
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Clears the current event log buffer.")]
-        [Output("success", "True if the buffer is cleared successfully.")]
+        [Description("Clears all entries from the current event log buffer.")]
+        [Output("success", "True if the buffer was cleared successfully.")]
         public static bool ClearCurrentEvents()
         {
             lock (Global.DebugLogLock)
