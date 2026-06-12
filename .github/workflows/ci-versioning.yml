@@ -1,0 +1,21 @@
+# Validation proxy: points at the chore/consolidate-dotnet-version-envs branch
+# of CI_Toolkit so the env-var consolidation refactor can be exercised
+# end-to-end against a real PR. Delete this file before closing the PR.
+
+name: Versioning
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  versioning:
+    uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/workflows/ci-versioning.yml@chore/consolidate-dotnet-version-envs
+    secrets:
+      BHOM_APP_ID: ${{ secrets.BHOM_APP_ID }}
+      BHOM_APP_PRIVATE_KEY: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
+    with:
+      versioning_toolkit_repo: 'BuroHappoldEngineeringSandbox/Versioning_Toolkit'
