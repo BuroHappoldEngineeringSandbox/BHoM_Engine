@@ -1,7 +1,5 @@
 # Orchestrator workflow — runs all CI_Toolkit_Proxy checks in parallel on every PR.
 
-name: CI (all checks)
-
 on:
   pull_request:
 
