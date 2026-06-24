@@ -40,6 +40,7 @@ namespace BH.Engine.Base
         [Output("success", "True if the buffer is cleared successfully.")]
         public static bool ClearCurrentEvents()
         {
+            // sandbox CI test marker (2026-06-24): exercises CI_Toolkit develop after PRs #80-#85; close without merging.
             lock (Global.DebugLogLock)
             {
                 Log log = Query.DebugLog();
