@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - dstest/base
+
+jobs:
+  ci-project-compliance:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: write
+    steps:
+      - name: Run project compliance via the ADMIN path (redirect test)
+        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-compliance@develop
+        with:
+          check_type: project
+          patterns: '*AssemblyInfo.cs *.csproj'
+          app_id: ${{ secrets.BHOM_APP_ID }}
+          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
