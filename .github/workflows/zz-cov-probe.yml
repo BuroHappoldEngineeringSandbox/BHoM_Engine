@@ -1,0 +1,30 @@
+name: zz-cov-probe
+
+# Size of ProgramData\BHoM\Datasets after a fresh dependency build.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    steps:
+      - uses: BuroHappoldEngineeringSandbox/CI_Toolkit/.github/actions/ci-unit-tests@probe/ut-report-rebased
+        continue-on-error: true
+        with:
+          app_id: ${{ secrets.BHOM_APP_ID }}
+          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
+      - name: Measure the BHoM folders
+        if: always()
+        shell: pwsh
+        run: |
+          foreach ($d in 'Assemblies', 'Upgrades', 'Datasets') {
+            $p = Join-Path $env:ProgramData "BHoM\$d"
+            $f = @(Get-ChildItem $p -Recurse -File -ErrorAction SilentlyContinue)
+            Write-Host "BHOMDIR|$d|exists=$(Test-Path $p)|files=$($f.Count)|bytes=$(($f | Measure-Object Length -Sum).Sum)"
+          }
+          Get-ChildItem "$env:ProgramData\BHoM\Datasets" -Directory -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "DSDIR|$($_.FullName)" }
