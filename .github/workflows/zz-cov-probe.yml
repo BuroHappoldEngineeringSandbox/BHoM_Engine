@@ -1,0 +1,72 @@
+name: zz-cov-probe
+
+# Does the coverlet Include filter change what is recorded? Two action refs
+# (filter on, filter off) crossed with the Datasets folder absent or present,
+# which is the state a dependency-cache miss leaves behind.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  filtered-absent:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    steps:
+      - name: Datasets state before the run
+        shell: pwsh
+        run: Write-Host "DATASETS|exists=$(Test-Path "$env:ProgramData\BHoM\Datasets")"
+      - uses: BuroHappoldEngineeringSandbox/CI_Toolkit/.github/actions/ci-unit-tests@probe/ut-report-rebased
+        continue-on-error: true
+        with:
+          app_id: ${{ secrets.BHOM_APP_ID }}
+          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
+
+  nofilter-absent:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    steps:
+      - name: Datasets state before the run
+        shell: pwsh
+        run: Write-Host "DATASETS|exists=$(Test-Path "$env:ProgramData\BHoM\Datasets")"
+      - uses: BuroHappoldEngineeringSandbox/CI_Toolkit/.github/actions/ci-unit-tests@probe/ut-report-nofilter
+        continue-on-error: true
+        with:
+          app_id: ${{ secrets.BHOM_APP_ID }}
+          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
+
+  filtered-present:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    steps:
+      - name: Populate Datasets as the dependency build would
+        shell: pwsh
+        run: |
+          git clone --depth 1 https://github.com/BHoM/Test_Toolkit.git "$env:RUNNER_TEMP\tt"
+          New-Item -ItemType Directory -Force "$env:ProgramData\BHoM\Datasets" | Out-Null
+          Copy-Item "$env:RUNNER_TEMP\tt\Datasets\*" "$env:ProgramData\BHoM\Datasets" -Recurse -Force
+          Write-Host "DATASETS|exists=$(Test-Path "$env:ProgramData\BHoM\Datasets")|dirs=$(@(Get-ChildItem "$env:ProgramData\BHoM\Datasets" -Directory -Recurse).Count)|files=$(@(Get-ChildItem "$env:ProgramData\BHoM\Datasets" -File -Recurse).Count)"
+      - uses: BuroHappoldEngineeringSandbox/CI_Toolkit/.github/actions/ci-unit-tests@probe/ut-report-rebased
+        continue-on-error: true
+        with:
+          app_id: ${{ secrets.BHOM_APP_ID }}
+          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
+
+  nofilter-present:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    steps:
+      - name: Populate Datasets as the dependency build would
+        shell: pwsh
+        run: |
+          git clone --depth 1 https://github.com/BHoM/Test_Toolkit.git "$env:RUNNER_TEMP\tt"
+          New-Item -ItemType Directory -Force "$env:ProgramData\BHoM\Datasets" | Out-Null
+          Copy-Item "$env:RUNNER_TEMP\tt\Datasets\*" "$env:ProgramData\BHoM\Datasets" -Recurse -Force
+          Write-Host "DATASETS|exists=$(Test-Path "$env:ProgramData\BHoM\Datasets")|dirs=$(@(Get-ChildItem "$env:ProgramData\BHoM\Datasets" -Directory -Recurse).Count)|files=$(@(Get-ChildItem "$env:ProgramData\BHoM\Datasets" -File -Recurse).Count)"
+      - uses: BuroHappoldEngineeringSandbox/CI_Toolkit/.github/actions/ci-unit-tests@probe/ut-report-nofilter
+        continue-on-error: true
+        with:
+          app_id: ${{ secrets.BHOM_APP_ID }}
+          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
