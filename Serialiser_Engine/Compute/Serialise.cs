@@ -142,7 +142,7 @@ namespace BH.Engine.Serialiser
         // Deserialisation supports both formats regardless of this value.
         // Set to false to write the new, AQN-free format.
         // To remove the switch, delete every block delimited by TODO-NewSerialisation markers, including this one.
-        private static readonly bool m_UseLegacySerialisation = true;
+        private static readonly bool m_UseLegacySerialisation = false;
         // ---- TODO-NewSerialisation: END legacy code ----
 
         /*******************************************/
