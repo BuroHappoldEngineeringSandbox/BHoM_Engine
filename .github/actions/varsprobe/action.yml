@@ -1,18 +1,15 @@
 name: vars probe
-description: Scratch. Does the vars context resolve inside a composite action?
+description: Scratch. Can an org variable reach a composite action without the vars context?
 inputs:
   passed:
-    description: Value passed in by the calling workflow, as a control.
+    description: Value passed in by the calling workflow as an input.
     required: false
     default: ""
 runs:
   using: composite
   steps:
-    - name: Read vars in a composite step
+    - name: Read the workarounds
       shell: pwsh
-      env:
-        FROM_ENV: ${{ vars.CURRENT_MILESTONE }}
       run: |
-        Write-Host "inline expression: [${{ vars.CURRENT_MILESTONE }}]"
-        Write-Host "env mapping:       [$env:FROM_ENV]"
-        Write-Host "passed input:      [${{ inputs.passed }}]"
+        Write-Host "passed input:     [${{ inputs.passed }}]"
+        Write-Host "inherited env:    [$env:FROM_CALLER_ENV]"
