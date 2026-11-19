@@ -66,11 +66,16 @@ jobs:
           Write-Host "caller workspace HEAD: $(Get-Content hashes\caller-head.txt)"
           Write-Host "seed clone HEAD:       $(Get-Content hashes\seed-head.txt)"
           Write-Host "PR head SHA:           ${{ github.event.pull_request.head.sha }}"
-          # Content check: does the tested Serialiser_Test.dll carry this PR's string literal?
-          $bytes = [IO.File]::ReadAllBytes("$pd\Serialiser_Test.dll")
-          $probe = [Text.Encoding]::Unicode.GetBytes("verify-source probe")
-          $text  = [Text.Encoding]::Unicode.GetString($bytes)
-          Write-Host ("tested Serialiser_Test.dll contains the PR's probe string: {0}" -f $text.Contains("verify-source probe"))
+          # Content check by raw byte search (any offset), on the tested DLL and the seed-built one.
+          $probe = [BitConverter]::ToString([Text.Encoding]::Unicode.GetBytes("verify-source probe"))
+          foreach ($f in "$pd\Serialiser_Test.dll", "C:hom-deps\BHoM_Engine\.ci\code\Serialiser_Testin\Release
+etstandard2.0\Serialiser_Test.dll") {
+            $hex = [BitConverter]::ToString([IO.File]::ReadAllBytes($f))
+            Write-Host ("probe string present (byte search) in {0}: {1}" -f $f, ($hex.IndexOf($probe) -ge 0))
+          }
+          Copy-Item "$pd\Serialiser_Test.dll" hashes	ested-Serialiser_Test.dll
+          git -C "C:hom-deps\BHoM_Engine" log -1 --format="seed clone: %H %s" | Write-Host
+          Select-String -Path "C:hom-deps\BHoM_Engine\.ci\code\Serialiser_Test\Verify\TypesToFromJson.cs" -Pattern "warnings reported" | ForEach-Object { Write-Host "seed source line: $($_.Line.Trim())" }
 
       - name: Upload hashes
         if: always()
