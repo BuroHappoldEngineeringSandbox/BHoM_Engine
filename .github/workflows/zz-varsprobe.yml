@@ -1,6 +1,6 @@
 name: zz-varsprobe
 
-# Scratch, Sandbox only: does vars resolve inside a composite action?
+# Scratch, Sandbox only: can an org variable reach a composite action?
 
 on:
   push:
@@ -19,5 +19,7 @@ jobs:
           echo "workflow: [${{ vars.CURRENT_MILESTONE }}]"
       - name: Composite action
         uses: ./.github/actions/varsprobe
+        env:
+          FROM_CALLER_ENV: ${{ vars.CURRENT_MILESTONE }}
         with:
           passed: ${{ vars.CURRENT_MILESTONE }}
