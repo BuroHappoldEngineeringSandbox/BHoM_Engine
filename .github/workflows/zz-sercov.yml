@@ -28,26 +28,36 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          $pd     = "$env:ProgramData\BHoM\Assemblies"
-          $caller = Join-Path $env:GITHUB_WORKSPACE "Build"
-          $seed   = "C:\bhom-deps\BHoM_Engine\Build"
-          function Hash($dir, $name) {
-            $p = Join-Path $dir $name
-            if (Test-Path $p) { (Get-FileHash $p -Algorithm SHA256).Hash } else { "" }
+          # Build output paths are hidden by -clp:ErrorsOnly, so search both trees for every
+          # copy of each tested DLL and record which tree holds a byte-identical one.
+          $pd    = "$env:ProgramData\BHoM\Assemblies"
+          $roots = [ordered]@{ caller = $env:GITHUB_WORKSPACE; seed = "C:\bhom-deps\BHoM_Engine" }
+          $index = @{}
+          foreach ($k in $roots.Keys) {
+            Get-ChildItem $roots[$k] -Recurse -Filter *.dll -File -ErrorAction SilentlyContinue | ForEach-Object {
+              $key = "$k|$($_.Name.ToLowerInvariant())"
+              if (-not $index.ContainsKey($key)) { $index[$key] = @() }
+              $index[$key] += [pscustomobject]@{ Path = $_.FullName; Hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash }
+            }
           }
           New-Item -ItemType Directory -Force -Path hashes | Out-Null
           $rows = Get-ChildItem $pd -Filter *.dll | Sort-Object Name | ForEach-Object {
             $t = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
-            $c = Hash $caller $_.Name
-            $s = Hash $seed $_.Name
-            $source = if ($c -and $t -eq $c) { "caller" } elseif ($s -and $t -eq $s) { "seed" }
-                      elseif (-not $c -and -not $s) { "neither-build" } else { "unmatched" }
-            [pscustomobject]@{ Name = $_.Name; Source = $source; InCaller = [bool]$c; InSeed = [bool]$s
-                               Tested = $t; Caller = $c; Seed = $s; Written = $_.LastWriteTimeUtc.ToString("o") }
+            $n = $_.Name.ToLowerInvariant()
+            $c = @($index["caller|$n"]); $s = @($index["seed|$n"])
+            $cm = @($c | Where-Object { $_ -and $_.Hash -eq $t }); $sm = @($s | Where-Object { $_ -and $_.Hash -eq $t })
+            $source = if ($cm.Count -and $sm.Count) { "both-identical" } elseif ($cm.Count) { "caller" }
+                      elseif ($sm.Count) { "seed" } elseif (-not ($c | Where-Object { $_ }) -and -not ($s | Where-Object { $_ })) { "neither-tree" }
+                      else { "unmatched" }
+            [pscustomobject]@{ Name = $_.Name; Source = $source
+                               CallerCopies = @($c | Where-Object { $_ }).Count; SeedCopies = @($s | Where-Object { $_ }).Count
+                               Tested = $t; CallerMatch = ($cm | Select-Object -First 1).Path; SeedMatch = ($sm | Select-Object -First 1).Path
+                               Written = $_.LastWriteTimeUtc.ToString("o") }
           }
           $rows | Export-Csv hashes\hashes.csv -NoTypeInformation
           $rows | Group-Object Source | ForEach-Object { "{0}: {1}" -f $_.Name, $_.Count }
-          $rows | Where-Object { $_.InCaller -and $_.InSeed } | Group-Object Source | ForEach-Object { "built by both -> {0}: {1}" -f $_.Name, $_.Count }
+          $rows | Where-Object { $_.CallerCopies -gt 0 -and $_.SeedCopies -gt 0 } | Group-Object Source |
+            ForEach-Object { "present in both trees -> {0}: {1}" -f $_.Name, $_.Count }
           git -C $env:GITHUB_WORKSPACE rev-parse HEAD | Out-File hashes\caller-head.txt
           git -C "C:\bhom-deps\BHoM_Engine" rev-parse HEAD | Out-File hashes\seed-head.txt
 
