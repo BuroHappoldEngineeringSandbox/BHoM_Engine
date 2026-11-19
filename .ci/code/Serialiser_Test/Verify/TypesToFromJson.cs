@@ -49,6 +49,7 @@ namespace BH.Test.Serialiser
                 .Concat(Engine.Base.Query.AdapterTypeList())
                 .ToList();
             List<TestResult> results = types.Select(x => TypeToFromJson(x)).ToList();
+            results = FaultInjection.Apply("TypesToFromJson", results);
 
             // Generate the result message
             int errorCount = results.Where(x => x.Status == TestStatus.Error).Count();

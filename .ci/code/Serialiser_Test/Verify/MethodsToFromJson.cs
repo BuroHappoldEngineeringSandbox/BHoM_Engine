@@ -48,6 +48,7 @@ namespace BH.Test.Serialiser
             // Test all the BHoM types available
             List<MethodInfo> methods = Engine.Base.Query.BHoMMethodList().Where(x => !x.IsDeprecated()).ToList();
             List<TestResult> results = methods.Select(x => MethodToFromJson(x)).ToList();
+            results = FaultInjection.Apply("MethodsToFromJson", results);
 
             // Generate the result message
             int errorCount = results.Where(x => x.Status == TestStatus.Error).Count();

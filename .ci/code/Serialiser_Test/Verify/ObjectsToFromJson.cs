@@ -46,6 +46,7 @@ namespace BH.Test.Serialiser
             // Test all the BHoM types available
             List<Type> types = Helpers.ObjectTypesToTest();
             List<TestResult> results = types.Select(x => ObjectToFromJson(x)).ToList();
+            results = FaultInjection.Apply("ObjectsToFromJson", results);
 
             // Generate the result message
             int errorCount = results.Where(x => x.Status == TestStatus.Error).Count();
