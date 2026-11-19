@@ -1,8 +1,8 @@
 name: zz-sercov
 
 # Scratch experiment, Sandbox only. Runs the production ci-serialisation action on this
-# branch to record coverage: population, per-leg figures and which assemblies were loaded.
-# Not a pull request, so compute-changed-files runs it unconditionally.
+# branch to record coverage, then hashes every DLL in ProgramData against the caller's own
+# build output and the BHoM/BHoM_Engine seed clone's, to see whose engine code was tested.
 
 on:
   push:
@@ -23,3 +23,38 @@ jobs:
           app_id: ${{ secrets.BHOM_APP_ID }}
           private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
           base_ref: develop
+
+      - name: Hash tested DLLs against both builds
+        if: always()
+        shell: pwsh
+        run: |
+          $pd     = "$env:ProgramData\BHoM\Assemblies"
+          $caller = Join-Path $env:GITHUB_WORKSPACE "Build"
+          $seed   = "C:\bhom-deps\BHoM_Engine\Build"
+          function Hash($dir, $name) {
+            $p = Join-Path $dir $name
+            if (Test-Path $p) { (Get-FileHash $p -Algorithm SHA256).Hash } else { "" }
+          }
+          New-Item -ItemType Directory -Force -Path hashes | Out-Null
+          $rows = Get-ChildItem $pd -Filter *.dll | Sort-Object Name | ForEach-Object {
+            $t = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            $c = Hash $caller $_.Name
+            $s = Hash $seed $_.Name
+            $source = if ($c -and $t -eq $c) { "caller" } elseif ($s -and $t -eq $s) { "seed" }
+                      elseif (-not $c -and -not $s) { "neither-build" } else { "unmatched" }
+            [pscustomobject]@{ Name = $_.Name; Source = $source; InCaller = [bool]$c; InSeed = [bool]$s
+                               Tested = $t; Caller = $c; Seed = $s; Written = $_.LastWriteTimeUtc.ToString("o") }
+          }
+          $rows | Export-Csv hashes\hashes.csv -NoTypeInformation
+          $rows | Group-Object Source | ForEach-Object { "{0}: {1}" -f $_.Name, $_.Count }
+          $rows | Where-Object { $_.InCaller -and $_.InSeed } | Group-Object Source | ForEach-Object { "built by both -> {0}: {1}" -f $_.Name, $_.Count }
+          git -C $env:GITHUB_WORKSPACE rev-parse HEAD | Out-File hashes\caller-head.txt
+          git -C "C:\bhom-deps\BHoM_Engine" rev-parse HEAD | Out-File hashes\seed-head.txt
+
+      - name: Upload hashes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sercov-hashes
+          path: hashes
+          retention-days: 14
