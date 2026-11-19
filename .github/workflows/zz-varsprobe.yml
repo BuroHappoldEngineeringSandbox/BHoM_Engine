@@ -1,0 +1,22 @@
+name: zz-varsprobe
+
+# Scratch, Sandbox only: does vars resolve inside a composite action?
+
+on:
+  push:
+    branches: [probe/vars-composite]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Read vars in the workflow (control)
+        run: echo "workflow: [${{ vars.CURRENT_MILESTONE }}]"
+      - name: Composite action
+        uses: ./.github/actions/varsprobe
+        with:
+          passed: ${{ vars.CURRENT_MILESTONE }}
