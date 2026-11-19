@@ -60,7 +60,7 @@ namespace BH.Test.Serialiser
             {
                 ID = "TypeSerialiserToFromJson",
                 Description = $"Serialisation of Types via json: {results.Count} types available.",
-                Message = $"{errorCount} errors and {warningCount} warnings reported.",
+                Message = $"{errorCount} errors and {warningCount} warnings reported (verify-source probe).",
                 Status = results.MostSevereStatus(),
                 Information = results.Where(x => x.Status != TestStatus.Pass).ToList<ITestInformation>(),
                 UTCTime = DateTime.UtcNow,
